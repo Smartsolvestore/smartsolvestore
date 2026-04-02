@@ -186,7 +186,7 @@ app.post('/api/create-order', async (req, res) => {
 });
 
 // ==========================================
-// Verification API (FIXED: added product: null to error responses)
+// Verification API (FIXED: returns product object from products table)
 // ==========================================
 app.post('/api/verify-code', async (req, res) => {
   const { code, phone, name, email } = req.body;
@@ -209,9 +209,10 @@ app.post('/api/verify-code', async (req, res) => {
     return res.status(400).json({ error: 'Invalid format', product: null });
   }
   try {
+    // 1. Fetch verification code record
     const { data: codeRecord, error: codeErr } = await supabase
       .from('verification_codes')
-      .select('*, products(*)')
+      .select('*')
       .eq('code', normCode)
       .single();
     if (codeErr || !codeRecord) {
@@ -226,13 +227,27 @@ app.post('/api/verify-code', async (req, res) => {
       await logAttempt(normCode, phone, ip, false, 'Expired');
       return res.status(400).json({ error: 'Code expired', product: null });
     }
+
+    // 2. Fetch the actual product details using product_id from the code record
+    const { data: product, error: prodErr } = await supabase
+      .from('products')
+      .select('id, name, emoji, price, description, image_url')
+      .eq('id', codeRecord.product_id)
+      .single();
+    if (prodErr || !product) {
+      await logAttempt(normCode, phone, ip, false, 'Product not found');
+      return res.status(404).json({ error: 'Associated product not found', product: null });
+    }
+
+    // 3. Fetch premium content for this product
     const { data: premium } = await supabase
       .from('premium_content')
       .select('*')
       .eq('product_id', codeRecord.product_id)
       .eq('is_active', true)
       .order('sort_order');
-    // customer upsert
+
+    // 4. Customer upsert
     const { data: existing, error: fetchError } = await supabase
       .from('customers')
       .select('*')
@@ -269,6 +284,8 @@ app.post('/api/verify-code', async (req, res) => {
       if (insErr) throw insErr;
       customer = newCust;
     }
+
+    // 5. Mark code as used
     await supabase
       .from('verification_codes')
       .update({
@@ -279,12 +296,15 @@ app.post('/api/verify-code', async (req, res) => {
         use_count: codeRecord.use_count + 1
       })
       .eq('id', codeRecord.id);
+
+    // 6. Generate session token
     const token = generateToken({
       customer_id: customer.id,
       phone: customer.phone,
       verified_products: customer.verified_products,
       role: normPhone === process.env.ADMIN_PHONE ? 'admin' : 'customer'
     });
+
     await logAttempt(normCode, phone, ip, true, 'Success');
     res.json({
       success: true,
@@ -296,7 +316,7 @@ app.post('/api/verify-code', async (req, res) => {
           phone: customer.phone
         }
       },
-      product: codeRecord.products,
+      product: product,
       premium_content: organizePremiumContent(premium),
       progress: customer.progress || {}
     });
