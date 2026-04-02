@@ -6,12 +6,11 @@
   <title>SmartSolve · Premium Hub | Problem Solved</title>
   <meta name="description" content="Smart home solutions for Indian families. Verify your product for premium guides, videos, and exclusive support.">
   
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <style>
-    /* (All styles remain exactly as before – no changes needed) */
+    /* (Keep all your existing styles – they are unchanged) */
     * {
       margin: 0;
       padding: 0;
@@ -604,7 +603,6 @@
       <label>Enter your unique verification code</label>
       <div class="verify-input-wrapper">
         <input type="text" id="verifyCode" class="verify-input" placeholder="e.g., SS250329-COM-001-ABC" maxlength="20" oninput="formatCodeInput(this)">
-        <!-- FIX: added onclick handler -->
         <button class="verify-btn" id="verifyBtn" onclick="verifyCodeReal()">Verify</button>
       </div>
       <p style="color: #64748b; font-size: 0.85rem;">Code found on your product packaging or invoice</p>
@@ -849,7 +847,7 @@
   async function submitUPIOrder(name, phone, address) {
     try {
       const amount = cart.reduce((s, i) => s + i.price, 0);
-      const orderRes = await fetch(`${API_URL}/api/create-order`, {
+      const res = await fetch(`${API_URL}/api/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -859,64 +857,40 @@
           paymentMethod: 'upi'
         })
       });
-      const order = await orderRes.json();
-      const options = {
-        key: order.key_id,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'SmartSolve',
-        description: `Order for ${cart.length} item(s)`,
-        order_id: order.id,
-        prefill: { name, contact: phone },
-        handler: async (response) => {
-          await verifyUPIPayment(response);
-        },
-        modal: { ondismiss: () => { location.reload(); } }
-      };
-      const rzp = new Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      alert('Failed to initiate payment. Please try again.');
-    }
-  }
-
-  async function verifyUPIPayment(response) {
-    try {
-      const res = await fetch(`${API_URL}/api/verify-payment`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_signature: response.razorpay_signature
-        })
-      });
-      const result = await res.json();
-      if (result.status === 'success') {
+      const data = await res.json();
+      if (data.status === 'upi_created') {
         localStorage.removeItem('smartsolve_cart');
         cart = [];
         updateCartCount();
         document.getElementById('checkoutForm').style.display = 'none';
         document.getElementById('paymentStatus').style.display = 'block';
         document.getElementById('paymentStatus').innerHTML = `
-          <div style="text-align:center; color:#10b981;">
-            <i class="fas fa-check-circle" style="font-size:3rem;"></i>
-            <h3>Payment Successful!</h3>
-            <p>Payment ID: ${result.payment_id}</p>
+          <div style="text-align:center; color:#3b82f6;">
+            <i class="fas fa-mobile-alt" style="font-size:3rem;"></i>
+            <h3>Pay via UPI</h3>
+            <p>Click the button below to pay ₹${data.amount/100} using any UPI app.</p>
+            <a href="${data.upi_link}" style="display:inline-block; background:#10b981; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; margin:10px 0;">
+              <i class="fas fa-arrow-right"></i> Pay Now
+            </a>
+            <p style="font-size:0.9rem;">After payment, your order will be confirmed manually. You'll receive a notification.</p>
             <button class="btn btn-primary" onclick="showSection('home')">Continue Shopping</button>
           </div>
         `;
       } else {
-        throw new Error('Verification failed');
+        throw new Error(data.error || 'Order failed');
       }
     } catch (error) {
-      alert('Payment verification failed. Contact support if amount deducted.');
+      alert('Failed to place UPI order. Please try again.');
     }
   }
 
+  // ==========================================
+  // FIXED VERIFICATION FUNCTION (safe)
+  // ==========================================
   async function verifyCodeReal() {
     const code = document.getElementById('verifyCode').value.trim();
     if (!code) return;
+
     const btn = document.getElementById('verifyBtn');
     btn.innerHTML = '<div class="loader"></div> Verifying...';
     btn.disabled = true;
@@ -948,19 +922,31 @@
         body: JSON.stringify({ code, name, phone })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Verification failed');
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Verification failed');
+      }
+
+      // SAFETY CHECK: product must exist
+      if (!data.product || !data.product.name) {
+        throw new Error('Invalid or expired verification code');
+      }
+
+      // Save session
       localStorage.setItem('smartsolve_session', JSON.stringify({
         token: data.session.token,
         customer: data.session.customer,
-        expires_at: Date.now() + 7*24*60*60*1000
+        expires_at: Date.now() + 7 * 24 * 60 * 60 * 1000
       }));
       session = data.session;
       showVerificationSuccess(data);
       showPremiumDashboard(data);
+
     } catch (error) {
-      document.getElementById('verificationResult').style.display = 'block';
-      document.getElementById('verificationResult').className = 'verification-result error';
-      document.getElementById('verificationResult').innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+      const resultDiv = document.getElementById('verificationResult');
+      resultDiv.style.display = 'block';
+      resultDiv.className = 'verification-result error';
+      resultDiv.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
     } finally {
       resetVerifyUI();
     }
