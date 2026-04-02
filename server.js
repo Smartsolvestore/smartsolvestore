@@ -186,68 +186,99 @@ app.post('/api/create-order', async (req, res) => {
 });
 
 // ==========================================
-// Verification API
+// Verification API (FIXED: added product: null to error responses)
 // ==========================================
 app.post('/api/verify-code', async (req, res) => {
   const { code, phone, name, email } = req.body;
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const rateKey = `${ip}:${phone}`;
-  if (!checkRateLimit(rateKey)) return res.status(429).json({ error: 'Too many attempts. Try again later.' });
-  if (!code || !phone || !name) return res.status(400).json({ error: 'Missing fields' });
+  if (!checkRateLimit(rateKey)) {
+    return res.status(429).json({ error: 'Too many attempts. Try again later.', product: null });
+  }
+  if (!code || !phone || !name) {
+    return res.status(400).json({ error: 'Missing fields', product: null });
+  }
   const normCode = code.trim().toUpperCase();
   const normPhone = normalizePhone(phone);
-  if (!normPhone) return res.status(400).json({ error: 'Invalid phone' });
+  if (!normPhone) {
+    return res.status(400).json({ error: 'Invalid phone', product: null });
+  }
   const codePattern = /^SS\d{6}-([A-Z]{3})-\d{3}-[A-Z0-9]{3}$/;
   if (!codePattern.test(normCode)) {
     await logAttempt(normCode, phone, ip, false, 'Invalid format');
-    return res.status(400).json({ error: 'Invalid format' });
+    return res.status(400).json({ error: 'Invalid format', product: null });
   }
   try {
-    const { data: codeRecord, error: codeErr } = await supabase.from('verification_codes').select('*, products(*)').eq('code', normCode).single();
+    const { data: codeRecord, error: codeErr } = await supabase
+      .from('verification_codes')
+      .select('*, products(*)')
+      .eq('code', normCode)
+      .single();
     if (codeErr || !codeRecord) {
       await logAttempt(normCode, phone, ip, false, 'Code not found');
-      return res.status(404).json({ error: 'Code not found' });
+      return res.status(404).json({ error: 'Code not found', product: null });
     }
     if (codeRecord.is_used && codeRecord.use_count >= codeRecord.max_uses) {
       await logAttempt(normCode, phone, ip, false, 'Already used');
-      return res.status(400).json({ error: 'Code already used' });
+      return res.status(400).json({ error: 'Code already used', product: null });
     }
     if (codeRecord.expires_at && new Date(codeRecord.expires_at) < new Date()) {
       await logAttempt(normCode, phone, ip, false, 'Expired');
-      return res.status(400).json({ error: 'Code expired' });
+      return res.status(400).json({ error: 'Code expired', product: null });
     }
-    const { data: premium } = await supabase.from('premium_content').select('*').eq('product_id', codeRecord.product_id).eq('is_active', true).order('sort_order');
+    const { data: premium } = await supabase
+      .from('premium_content')
+      .select('*')
+      .eq('product_id', codeRecord.product_id)
+      .eq('is_active', true)
+      .order('sort_order');
     // customer upsert
-    const { data: existing, error: fetchError } = await supabase.from('customers').select('*').eq('phone', normPhone).single();
+    const { data: existing, error: fetchError } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone', normPhone)
+      .single();
     if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
     let customer;
     if (existing) {
       const updatedProducts = Array.from(new Set([...existing.verified_products, codeRecord.id]));
-      const { data: upd, error: updErr } = await supabase.from('customers').update({
-        verified_products: updatedProducts,
-        last_access_at: new Date().toISOString()
-      }).eq('phone', normPhone).select().single();
+      const { data: upd, error: updErr } = await supabase
+        .from('customers')
+        .update({
+          verified_products: updatedProducts,
+          last_access_at: new Date().toISOString()
+        })
+        .eq('phone', normPhone)
+        .select()
+        .single();
       if (updErr) throw updErr;
       customer = upd;
     } else {
-      const { data: newCust, error: insErr } = await supabase.from('customers').insert({
-        phone: normPhone,
-        name,
-        email: email || null,
-        verified_products: [codeRecord.id],
-        joined_at: new Date().toISOString(),
-        last_access_at: new Date().toISOString()
-      }).select().single();
+      const { data: newCust, error: insErr } = await supabase
+        .from('customers')
+        .insert({
+          phone: normPhone,
+          name,
+          email: email || null,
+          verified_products: [codeRecord.id],
+          joined_at: new Date().toISOString(),
+          last_access_at: new Date().toISOString()
+        })
+        .select()
+        .single();
       if (insErr) throw insErr;
       customer = newCust;
     }
-    await supabase.from('verification_codes').update({
-      is_used: true,
-      used_at: new Date().toISOString(),
-      used_by_phone: normPhone,
-      used_by_name: name,
-      use_count: codeRecord.use_count + 1
-    }).eq('id', codeRecord.id);
+    await supabase
+      .from('verification_codes')
+      .update({
+        is_used: true,
+        used_at: new Date().toISOString(),
+        used_by_phone: normPhone,
+        used_by_name: name,
+        use_count: codeRecord.use_count + 1
+      })
+      .eq('id', codeRecord.id);
     const token = generateToken({
       customer_id: customer.id,
       phone: customer.phone,
@@ -257,14 +288,21 @@ app.post('/api/verify-code', async (req, res) => {
     await logAttempt(normCode, phone, ip, true, 'Success');
     res.json({
       success: true,
-      session: { token, customer: { id: customer.id, name: customer.name, phone: customer.phone } },
+      session: {
+        token,
+        customer: {
+          id: customer.id,
+          name: customer.name,
+          phone: customer.phone
+        }
+      },
       product: codeRecord.products,
       premium_content: organizePremiumContent(premium),
       progress: customer.progress || {}
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Verification failed' });
+    res.status(500).json({ error: 'Verification failed', product: null });
   }
 });
 
@@ -272,29 +310,63 @@ app.post('/api/verify-session', async (req, res) => {
   const { token } = req.body;
   const decoded = verifyToken(token);
   if (!decoded) return res.status(401).json({ valid: false });
-  const { data: customer, error } = await supabase.from('customers').select('*').eq('id', decoded.customer_id).single();
+  const { data: customer, error } = await supabase
+    .from('customers')
+    .select('*')
+    .eq('id', decoded.customer_id)
+    .single();
   if (error || !customer) return res.status(401).json({ valid: false });
-  const { data: premium } = await supabase.from('premium_content').select('*').in('product_id', customer.verified_products).eq('is_active', true);
-  res.json({ valid: true, customer: { id: customer.id, name: customer.name, phone: customer.phone }, premium_content: organizePremiumContent(premium), progress: customer.progress });
+  const { data: premium } = await supabase
+    .from('premium_content')
+    .select('*')
+    .in('product_id', customer.verified_products)
+    .eq('is_active', true);
+  res.json({
+    valid: true,
+    customer: {
+      id: customer.id,
+      name: customer.name,
+      phone: customer.phone
+    },
+    premium_content: organizePremiumContent(premium),
+    progress: customer.progress
+  });
 });
 
 app.post('/api/update-progress', authenticate, async (req, res) => {
   const { product_id, progress_type, content_id, completed } = req.body;
-  const { data: customer } = await supabase.from('customers').select('progress').eq('id', req.user.customer_id).single();
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('progress')
+    .eq('id', req.user.customer_id)
+    .single();
   const progress = customer.progress || {};
   if (!progress[product_id]) progress[product_id] = {};
   if (!progress[product_id][progress_type]) progress[product_id][progress_type] = {};
-  progress[product_id][progress_type][content_id] = { completed, completed_at: completed ? new Date().toISOString() : null };
-  await supabase.from('customers').update({ progress, last_access_at: new Date().toISOString() }).eq('id', req.user.customer_id);
+  progress[product_id][progress_type][content_id] = {
+    completed,
+    completed_at: completed ? new Date().toISOString() : null
+  };
+  await supabase
+    .from('customers')
+    .update({ progress, last_access_at: new Date().toISOString() })
+    .eq('id', req.user.customer_id);
   res.json({ success: true, progress: progress[product_id] });
 });
 
 app.post('/api/save-notes', authenticate, async (req, res) => {
   const { product_id, notes } = req.body;
-  const { data: customer } = await supabase.from('customers').select('notes').eq('id', req.user.customer_id).single();
+  const { data: customer } = await supabase
+    .from('customers')
+    .select('notes')
+    .eq('id', req.user.customer_id)
+    .single();
   const current = customer.notes || {};
   current[product_id] = notes;
-  await supabase.from('customers').update({ notes: current }).eq('id', req.user.customer_id);
+  await supabase
+    .from('customers')
+    .update({ notes: current })
+    .eq('id', req.user.customer_id);
   res.json({ success: true });
 });
 
@@ -315,14 +387,20 @@ adminRouter.post('/login', async (req, res) => {
 
 adminRouter.post('/confirm-upi', authenticateAdmin, async (req, res) => {
   const { orderId } = req.body;
-  const { error } = await supabase.from('orders').update({ status: 'upi_confirmed', paid_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', orderId);
+  const { error } = await supabase
+    .from('orders')
+    .update({ status: 'upi_confirmed', paid_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('id', orderId);
   if (error) return res.status(400).json({ error: error.message });
   res.json({ success: true });
 });
 
 adminRouter.post('/confirm-cod', authenticateAdmin, async (req, res) => {
   const { orderId } = req.body;
-  const { error } = await supabase.from('orders').update({ status: 'cod_confirmed', paid_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', orderId);
+  const { error } = await supabase
+    .from('orders')
+    .update({ status: 'cod_confirmed', paid_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+    .eq('id', orderId);
   if (error) return res.status(400).json({ error: error.message });
   res.json({ success: true });
 });
@@ -338,7 +416,9 @@ adminRouter.get('/orders', authenticateAdmin, async (req, res) => {
 
 adminRouter.get('/stats', authenticateAdmin, async (req, res) => {
   const { data: orders } = await supabase.from('orders').select('status, amount');
-  const { data: customers, count: customerCount } = await supabase.from('customers').select('id', { count: 'exact', head: true });
+  const { data: customers, count: customerCount } = await supabase
+    .from('customers')
+    .select('id', { count: 'exact', head: true });
   const { data: products } = await supabase.from('products').select('id').eq('active', true);
   const stats = {
     totalRevenue: orders.filter(o => o.status === 'upi_confirmed' || o.status === 'cod_confirmed').reduce((s, o) => s + o.amount, 0),
@@ -398,7 +478,7 @@ const MeeshoService = require('./services/MeeshoService');
 require('./cron/jobs');
 
 // ==========================================
-// Telegram Webhook Route (FIXED)
+// Telegram Webhook Route
 // ==========================================
 app.post('/telegram-webhook', require('./telegram-bot'));
 
