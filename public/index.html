@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>SmartSolve · Premium Hub | Problem Solved</title>
+  <meta name="description" content="Smart home solutions for Indian families. Verify your product for premium guides, videos, and exclusive support.">
+  
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    /* (All styles remain exactly as before – no changes needed) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.5;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    body.dark-mode {
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .product-card,
+    body.dark-mode .passport-card,
+    body.dark-mode .verification-container {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    body.dark-mode input,
+    body.dark-mode textarea,
+    body.dark-mode select {
+      background: #0f172a;
+      color: #f1f5f9;
+      border-color: #334155;
+    }
+
+    .bg-gradient {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 10% 20%, rgba(59,130,246,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    nav {
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    body.dark-mode nav {
+      background: rgba(15,23,42,0.9);
+      border-bottom-color: #334155;
+    }
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    .logo-icon {
+      background: #3b82f6;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+    .nav-links a {
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover {
+      color: #3b82f6;
+    }
+    .dark-mode-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e293b;
+      color: white;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      transition: transform 0.2s;
+    }
+    .dark-mode-toggle:hover {
+      transform: scale(1.05);
+    }
+    body.dark-mode .dark-mode-toggle {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .whatsapp-float {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      background: #25d366;
+      color: white;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      text-decoration: none;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 1000;
+      transition: transform 0.2s;
+    }
+    .whatsapp-float:hover {
+      transform: scale(1.05);
+    }
+
+    .content-section {
+      display: none;
+      max-width: 1200px;
+      margin: 2rem auto;
+      padding: 0 2rem;
+    }
+    .content-section.active {
+      display: block;
+    }
+    h2 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #e2e8f0;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      width: fit-content;
+    }
+    body.dark-mode .back-btn {
+      background: #334155;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .product-card {
+      background: white;
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .product-image-container {
+      position: relative;
+      height: 220px;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .product-image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .product-card:hover .product-image-container img {
+      transform: scale(1.05);
+    }
+    .product-info {
+      padding: 1.25rem;
+    }
+    .product-info h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+    }
+    .price {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #10b981;
+      margin: 0.5rem 0;
+    }
+    .original-price {
+      text-decoration: line-through;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-left: 0.5rem;
+    }
+    .stock-status {
+      font-size: 0.8rem;
+      margin: 0.5rem 0;
+    }
+    .in-stock { color: #10b981; }
+    .out-of-stock { color: #ef4444; }
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    .btn {
+      flex: 1;
+      padding: 0.75rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #cbd5e1;
+    }
+    .wishlist-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: white;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .checkout-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    }
+    .checkout-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .checkout-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .checkout-item-details {
+      flex: 1;
+    }
+    .cart-total {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: right;
+      margin: 1rem 0;
+    }
+    .payment-methods {
+      margin: 1.5rem 0;
+    }
+    .payment-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .payment-option.selected {
+      border-color: #3b82f6;
+      background: rgba(59,130,246,0.05);
+    }
+    .cod-warning {
+      background: #fef3c7;
+      padding: 0.75rem;
+      border-radius: 8px;
+      margin: 1rem 0;
+      color: #92400e;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .verification-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      text-align: center;
+    }
+    .verify-input-wrapper {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .verify-input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-family: monospace;
+      font-size: 1rem;
+    }
+    .verify-btn {
+      background: #3b82f6;
+      color: white;
+      padding: 0 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .verification-result {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+    }
+    .verification-result.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    .verification-result.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .member-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .welcome-badge {
+      background: #fbbf24;
+      color: #0f172a;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .premium-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+    .premium-tab {
+      padding: 0.5rem 1rem;
+      background: #e2e8f0;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .premium-tab.active {
+      background: #3b82f6;
+      color: white;
+    }
+    .premium-tab-content {
+      display: none;
+    }
+    .premium-tab-content.active {
+      display: block;
+    }
+    .guides-grid, .videos-grid {
+      display: grid;
+      gap: 1rem;
+    }
+    .premium-card {
+      background: #f1f5f9;
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    .video-card {
+      display: flex;
+      gap: 1rem;
+      background: #f1f5f9;
+      padding: 1rem;
+      border-radius: 12px;
+    }
+    .video-thumbnail iframe {
+      width: 160px;
+      height: 90px;
+      border-radius: 8px;
+    }
+    .notes-textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-family: inherit;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 3rem;
+    }
+    body.dark-mode footer {
+      border-top-color: #334155;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #fff;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+      .content-section {
+        padding: 0 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-gradient"></div>
+
+<div class="dark-mode-toggle" onclick="toggleDarkMode()">
+  <i class="fas fa-moon"></i>
+</div>
+
+<a href="https://wa.me/919123869646?text=Hi%20SmartSolve!" class="whatsapp-float" target="_blank">
+  <i class="fab fa-whatsapp"></i>
+</a>
+
+<nav>
+  <div class="nav-container">
+    <div class="logo" onclick="showSection('home')">
+      <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+      <div>SmartSolve <span style="font-size:0.7rem;">PROBLEM SOLVED</span></div>
+    </div>
+    <ul class="nav-links">
+      <li><a onclick="showSection('home')">Home</a></li>
+      <li><a onclick="showSection('guides')">Shop</a></li>
+      <li><a onclick="showSection('verify')">Verify</a></li>
+      <li><a onclick="showSection('checkout')">Cart <span id="cartCount" style="background:#ef4444; color:white; padding:2px 6px; border-radius:10px; font-size:0.7rem; display:none;">0</span></a></li>
+    </ul>
+  </div>
+</nav>
+
+<section id="home" class="content-section active">
+  <div style="text-align: center; padding: 3rem 0;">
+    <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">Welcome to <span style="color:#3b82f6;">SmartSolve</span></h1>
+    <p style="font-size: 1.2rem; color: #64748b; max-width: 600px; margin: 0 auto;">Smart solutions for Indian homes. Buy products, unlock premium guides and videos.</p>
+    <div style="margin-top: 2rem;">
+      <button class="btn btn-primary" onclick="showSection('guides')">Shop Now</button>
+      <button class="btn btn-outline" onclick="showSection('verify')" style="margin-left: 1rem;">Verify Product</button>
+    </div>
+  </div>
+  <div id="recentlyViewedSection" style="margin-top: 2rem; display: none;">
+    <h3>Recently Viewed</h3>
+    <div id="recentGrid" style="display: flex; gap: 1rem; overflow-x: auto; padding: 1rem 0;"></div>
+  </div>
+</section>
+
+<section id="guides" class="content-section">
+  <h2>🛍️ Product Store</h2>
+  <a class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Back</a>
+  <div class="search-bar" style="margin: 1rem 0;">
+    <input type="text" id="searchInput" placeholder="🔍 Search products..." style="width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #e2e8f0;">
+  </div>
+  <div class="product-grid" id="productGrid">
+    <div class="loader" style="margin: 2rem auto;"></div>
+  </div>
+</section>
+
+<section id="checkout" class="content-section">
+  <h2>🇮🇳 Secure Checkout</h2>
+  <a class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Back</a>
+  <div class="checkout-container" id="checkoutContainer">
+    <div id="checkoutItems"></div>
+    <div id="checkoutEmpty" style="display:none; text-align:center; padding:2rem;">
+      <i class="fas fa-shopping-cart" style="font-size:3rem; color:#94a3b8;"></i>
+      <p>Your cart is empty</p>
+      <button class="btn btn-primary" onclick="showSection('guides')">Continue Shopping</button>
+    </div>
+    <div id="checkoutForm" style="display:block;">
+      <div class="cart-total">Total: ₹<span id="checkoutTotal">0</span></div>
+      <div id="customerDetails">
+        <h4>Delivery Details</h4>
+        <input type="text" id="custName" placeholder="Full Name" required style="width:100%; padding:0.75rem; margin:0.5rem 0; border:1px solid #e2e8f0; border-radius:8px;">
+        <input type="tel" id="custPhone" placeholder="Phone Number (+91)" required style="width:100%; padding:0.75rem; margin:0.5rem 0; border:1px solid #e2e8f0; border-radius:8px;">
+        <input type="email" id="custEmail" placeholder="Email (optional)" style="width:100%; padding:0.75rem; margin:0.5rem 0; border:1px solid #e2e8f0; border-radius:8px;">
+        <textarea id="custAddress" placeholder="Complete Delivery Address (House, Street, City, Pincode)" rows="3" required style="width:100%; padding:0.75rem; margin:0.5rem 0; border:1px solid #e2e8f0; border-radius:8px;"></textarea>
+      </div>
+      <div class="payment-methods">
+        <h4>Payment Method</h4>
+        <div class="payment-option" data-method="upi">
+          <input type="radio" name="paymentMethod" value="upi" checked> 
+          <i class="fas fa-mobile-alt"></i> UPI (Google Pay, PhonePe, etc.) – Instant Payment
+        </div>
+        <div class="payment-option" data-method="cod">
+          <input type="radio" name="paymentMethod" value="cod"> 
+          <i class="fas fa-rupee-sign"></i> Cash on Delivery (Pay when you receive)
+        </div>
+        <div id="codWarning" class="cod-warning">
+          <i class="fas fa-info-circle"></i> COD orders require a valid phone number. Our delivery partner will call before delivery.
+        </div>
+      </div>
+      <button id="payBtn" class="btn btn-success" style="width:100%; padding:1rem; font-size:1.1rem;" onclick="initiatePayment()">
+        <i class="fas fa-lock"></i> Pay Securely
+      </button>
+      <div id="paymentStatus" style="display:none; margin-top:1rem; padding:1rem; border-radius:8px;"></div>
+    </div>
+  </div>
+</section>
+
+<section id="verify" class="content-section">
+  <h2>🛡️ Verify Your Product</h2>
+  <a class="back-btn" onclick="showSection('home')"><i class="fas fa-arrow-left"></i> Back</a>
+  <div class="verification-container">
+    <div id="verifyForm">
+      <label>Enter your unique verification code</label>
+      <div class="verify-input-wrapper">
+        <input type="text" id="verifyCode" class="verify-input" placeholder="e.g., SS250329-COM-001-ABC" maxlength="20" oninput="formatCodeInput(this)">
+        <!-- FIX: added onclick handler -->
+        <button class="verify-btn" id="verifyBtn" onclick="verifyCodeReal()">Verify</button>
+      </div>
+      <p style="color: #64748b; font-size: 0.85rem;">Code found on your product packaging or invoice</p>
+    </div>
+    <div id="verifyLoading" style="display:none; text-align:center; padding:2rem;">
+      <div class="loader"></div>
+      <p>Verifying...</p>
+    </div>
+    <div id="verificationResult" class="verification-result" style="display:none;"></div>
+    <div id="memberDashboard" style="display:none;"></div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2025 SmartSolve. All rights reserved. Made in India 🇮🇳</p>
+</footer>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+  const API_URL = window.location.origin;
+
+  let products = [];
+  let cart = JSON.parse(localStorage.getItem('smartsolve_cart')) || [];
+  let wishlist = JSON.parse(localStorage.getItem('smartsolve_wishlist')) || [];
+  let session = JSON.parse(localStorage.getItem('smartsolve_session')) || null;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    await loadProducts();
+    updateCartCount();
+    loadRecentlyViewed();
+    checkSession();
+    setupEventListeners();
+  });
+
+  function setupEventListeners() {
+    document.querySelectorAll('.payment-option').forEach(opt => {
+      opt.addEventListener('click', () => {
+        const radio = opt.querySelector('input[type="radio"]');
+        radio.checked = true;
+        document.getElementById('codWarning').style.display = radio.value === 'cod' ? 'block' : 'none';
+      });
+    });
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.getElementById('codWarning').style.display = radio.value === 'cod' ? 'block' : 'none';
+      });
+    });
+  }
+
+  async function loadProducts() {
+    try {
+      const res = await fetch(`${API_URL}/api/products`);
+      const data = await res.json();
+      products = data.products || [];
+      renderProducts();
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      document.getElementById('productGrid').innerHTML = '<p>Failed to load products. Please refresh.</p>';
+    }
+  }
+
+  function renderProducts() {
+    const grid = document.getElementById('productGrid');
+    if (!products.length) {
+      grid.innerHTML = '<p>No products yet. Check back soon!</p>';
+      return;
+    }
+    grid.innerHTML = products.map(p => {
+      const inWishlist = wishlist.includes(p.id);
+      const stockClass = p.stock > 0 ? 'in-stock' : 'out-of-stock';
+      const stockText = p.stock > 0 ? `✓ In Stock (${p.stock} left)` : '❌ Out of Stock';
+      const imageUrl = p.image_url || `https://placehold.co/400x400/3b82f6/white?text=${encodeURIComponent(p.emoji)}`;
+      return `
+        <div class="product-card" data-id="${p.id}" onclick="viewProduct('${p.id}')">
+          <div class="product-image-container">
+            <img src="${imageUrl}" alt="${p.name}" loading="lazy" onerror="this.src='https://placehold.co/400x400/3b82f6/white?text=${encodeURIComponent(p.emoji)}'">
+            <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist('${p.id}')">
+              <i class="${inWishlist ? 'fas' : 'far'} fa-heart"></i>
+            </button>
+          </div>
+          <div class="product-info">
+            <h3>${p.emoji} ${p.name}</h3>
+            <div class="price">₹${p.price}${p.original_price ? `<span class="original-price">₹${p.original_price}</span>` : ''}</div>
+            <div class="stock-status ${stockClass}">${stockText}</div>
+            <div class="btn-group">
+              <button class="btn btn-primary" onclick="event.stopPropagation(); addToCart('${p.id}')">Add to Cart</button>
+              <button class="btn btn-success" onclick="event.stopPropagation(); buyNow('${p.id}')">Buy Now</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderCheckout() {
+    const container = document.getElementById('checkoutItems');
+    const emptyDiv = document.getElementById('checkoutEmpty');
+    const formDiv = document.getElementById('checkoutForm');
+    const totalSpan = document.getElementById('checkoutTotal');
+
+    if (!cart.length) {
+      container.innerHTML = '';
+      emptyDiv.style.display = 'block';
+      formDiv.style.display = 'none';
+      return;
+    }
+    emptyDiv.style.display = 'none';
+    formDiv.style.display = 'block';
+
+    const total = cart.reduce((sum, item) => sum + item.price, 0);
+    totalSpan.innerText = total;
+
+    container.innerHTML = cart.map((item, idx) => {
+      const imageUrl = item.image_url || `https://placehold.co/60x60/3b82f6/white?text=${encodeURIComponent(item.emoji)}`;
+      return `
+        <div class="checkout-item">
+          <img src="${imageUrl}" alt="${item.name}">
+          <div class="checkout-item-details">
+            <div><strong>${item.emoji} ${item.name}</strong></div>
+            <div>₹${item.price}</div>
+          </div>
+          <button onclick="removeFromCart(${idx})" style="background:none; border:none; color:#ef4444; cursor:pointer;"><i class="fas fa-trash"></i></button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function loadRecentlyViewed() {
+    const viewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+    const section = document.getElementById('recentlyViewedSection');
+    const grid = document.getElementById('recentGrid');
+    if (!viewed.length) {
+      section.style.display = 'none';
+      return;
+    }
+    section.style.display = 'block';
+    grid.innerHTML = viewed.slice(0, 6).map(id => {
+      const prod = products.find(p => p.id === id);
+      if (!prod) return '';
+      const imageUrl = prod.image_url || `https://placehold.co/80x80/3b82f6/white?text=${encodeURIComponent(prod.emoji)}`;
+      return `
+        <div style="min-width: 100px; text-align:center; cursor:pointer;" onclick="viewProduct('${prod.id}')">
+          <img src="${imageUrl}" style="width:80px; height:80px; border-radius:8px; object-fit:cover;">
+          <div style="font-size:0.8rem;">${prod.name}</div>
+          <div style="font-size:0.75rem; color:#10b981;">₹${prod.price}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function addToCart(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    cart.push(product);
+    localStorage.setItem('smartsolve_cart', JSON.stringify(cart));
+    updateCartCount();
+    showToast('Added to cart!');
+  }
+
+  function removeFromCart(index) {
+    cart.splice(index, 1);
+    localStorage.setItem('smartsolve_cart', JSON.stringify(cart));
+    renderCheckout();
+    updateCartCount();
+  }
+
+  function buyNow(productId) {
+    addToCart(productId);
+    showSection('checkout');
+  }
+
+  function updateCartCount() {
+    const count = cart.length;
+    const badge = document.getElementById('cartCount');
+    if (count > 0) {
+      badge.textContent = count;
+      badge.style.display = 'inline';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  async function initiatePayment() {
+    const name = document.getElementById('custName').value.trim();
+    const phone = document.getElementById('custPhone').value.trim();
+    const address = document.getElementById('custAddress').value.trim();
+    if (!name || !phone || !address) {
+      alert('Please fill all required fields');
+      return;
+    }
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const btn = document.getElementById('payBtn');
+    btn.innerHTML = '<div class="loader" style="border-color:white; border-top-color:transparent;"></div> Processing...';
+    btn.disabled = true;
+
+    if (paymentMethod === 'cod') {
+      await submitCODOrder(name, phone, address);
+    } else {
+      await submitUPIOrder(name, phone, address);
+    }
+    btn.innerHTML = '<i class="fas fa-lock"></i> Pay Securely';
+    btn.disabled = false;
+  }
+
+  async function submitCODOrder(name, phone, address) {
+    try {
+      const amount = cart.reduce((s, i) => s + i.price, 0);
+      const res = await fetch(`${API_URL}/api/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amount * 100,
+          items: cart,
+          customerInfo: { name, phone, address },
+          paymentMethod: 'cod'
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'cod_created') {
+        localStorage.removeItem('smartsolve_cart');
+        cart = [];
+        updateCartCount();
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('paymentStatus').style.display = 'block';
+        document.getElementById('paymentStatus').innerHTML = `
+          <div style="text-align:center; color:#10b981;">
+            <i class="fas fa-truck" style="font-size:3rem;"></i>
+            <h3>Order Placed Successfully!</h3>
+            <p>Order #${data.order_id} confirmed. You'll pay ₹${data.amount/100} on delivery.</p>
+            <button class="btn btn-primary" onclick="showSection('home')">Continue Shopping</button>
+          </div>
+        `;
+      } else {
+        throw new Error(data.error || 'Order failed');
+      }
+    } catch (error) {
+      alert('Failed to place COD order. Please try again.');
+    }
+  }
+
+  async function submitUPIOrder(name, phone, address) {
+    try {
+      const amount = cart.reduce((s, i) => s + i.price, 0);
+      const orderRes = await fetch(`${API_URL}/api/create-order`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: amount * 100,
+          items: cart,
+          customerInfo: { name, phone, address },
+          paymentMethod: 'upi'
+        })
+      });
+      const order = await orderRes.json();
+      const options = {
+        key: order.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'SmartSolve',
+        description: `Order for ${cart.length} item(s)`,
+        order_id: order.id,
+        prefill: { name, contact: phone },
+        handler: async (response) => {
+          await verifyUPIPayment(response);
+        },
+        modal: { ondismiss: () => { location.reload(); } }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    } catch (error) {
+      alert('Failed to initiate payment. Please try again.');
+    }
+  }
+
+  async function verifyUPIPayment(response) {
+    try {
+      const res = await fetch(`${API_URL}/api/verify-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_signature: response.razorpay_signature
+        })
+      });
+      const result = await res.json();
+      if (result.status === 'success') {
+        localStorage.removeItem('smartsolve_cart');
+        cart = [];
+        updateCartCount();
+        document.getElementById('checkoutForm').style.display = 'none';
+        document.getElementById('paymentStatus').style.display = 'block';
+        document.getElementById('paymentStatus').innerHTML = `
+          <div style="text-align:center; color:#10b981;">
+            <i class="fas fa-check-circle" style="font-size:3rem;"></i>
+            <h3>Payment Successful!</h3>
+            <p>Payment ID: ${result.payment_id}</p>
+            <button class="btn btn-primary" onclick="showSection('home')">Continue Shopping</button>
+          </div>
+        `;
+      } else {
+        throw new Error('Verification failed');
+      }
+    } catch (error) {
+      alert('Payment verification failed. Contact support if amount deducted.');
+    }
+  }
+
+  async function verifyCodeReal() {
+    const code = document.getElementById('verifyCode').value.trim();
+    if (!code) return;
+    const btn = document.getElementById('verifyBtn');
+    btn.innerHTML = '<div class="loader"></div> Verifying...';
+    btn.disabled = true;
+    document.getElementById('verifyLoading').style.display = 'block';
+    document.getElementById('verificationResult').style.display = 'none';
+
+    const name = prompt('Enter your full name:');
+    if (!name) {
+      resetVerifyUI();
+      return;
+    }
+    let phone = prompt('Enter your phone number (10 digits):');
+    if (!phone) {
+      resetVerifyUI();
+      return;
+    }
+    const phoneClean = phone.replace(/\D/g, '');
+    if (!/^[6-9]\d{9}$/.test(phoneClean)) {
+      alert('Invalid Indian phone number. Please enter 10 digits starting with 6-9.');
+      resetVerifyUI();
+      return;
+    }
+    phone = '+91' + phoneClean;
+
+    try {
+      const res = await fetch(`${API_URL}/api/verify-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, name, phone })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Verification failed');
+      localStorage.setItem('smartsolve_session', JSON.stringify({
+        token: data.session.token,
+        customer: data.session.customer,
+        expires_at: Date.now() + 7*24*60*60*1000
+      }));
+      session = data.session;
+      showVerificationSuccess(data);
+      showPremiumDashboard(data);
+    } catch (error) {
+      document.getElementById('verificationResult').style.display = 'block';
+      document.getElementById('verificationResult').className = 'verification-result error';
+      document.getElementById('verificationResult').innerHTML = `<i class="fas fa-exclamation-circle"></i> ${error.message}`;
+    } finally {
+      resetVerifyUI();
+    }
+  }
+
+  function resetVerifyUI() {
+    document.getElementById('verifyBtn').innerHTML = 'Verify';
+    document.getElementById('verifyBtn').disabled = false;
+    document.getElementById('verifyLoading').style.display = 'none';
+  }
+
+  function showVerificationSuccess(data) {
+    const result = document.getElementById('verificationResult');
+    result.className = 'verification-result success';
+    result.style.display = 'block';
+    result.innerHTML = `
+      <div style="text-align:center;">
+        <i class="fas fa-check-circle" style="font-size:3rem; color:#10b981;"></i>
+        <h3>Welcome, ${data.session.customer.name}!</h3>
+        <p>Your product has been verified. Premium access unlocked for 7 days.</p>
+      </div>
+    `;
+  }
+
+  function showPremiumDashboard(data) {
+    const dashboard = document.getElementById('memberDashboard');
+    dashboard.style.display = 'block';
+    const { customer, product, premium_content, progress } = data;
+    const content = premium_content || { guides: [], videos: [], tips: {}, fixes: [] };
+    dashboard.innerHTML = `
+      <div class="member-header">
+        <h2>👋 Welcome back, ${customer.name}!</h2>
+        <div><span class="welcome-badge"><i class="fas fa-crown"></i> PREMIUM MEMBER</span></div>
+      </div>
+      <div class="premium-tabs">
+        <button class="premium-tab active" onclick="showTab('guides')">📘 Guides (${content.guides.length})</button>
+        <button class="premium-tab" onclick="showTab('videos')">🎥 Videos (${content.videos.length})</button>
+        <button class="premium-tab" onclick="showTab('tips')">💡 Tips</button>
+        <button class="premium-tab" onclick="showTab('notes')">📝 My Notes</button>
+      </div>
+      <div id="tab-guides" class="premium-tab-content active">
+        ${renderGuides(content.guides, progress)}
+      </div>
+      <div id="tab-videos" class="premium-tab-content">
+        ${renderVideos(content.videos, progress)}
+      </div>
+      <div id="tab-tips" class="premium-tab-content">
+        ${renderTips(content.tips)}
+      </div>
+      <div id="tab-notes" class="premium-tab-content">
+        ${renderNotes(progress?.notes || '')}
+      </div>
+    `;
+  }
+
+  function renderGuides(guides, progress) {
+    if (!guides.length) return '<p>No guides available yet.</p>';
+    return guides.map(g => `
+      <div class="premium-card">
+        <h4>${g.title}</h4>
+        <ul>${g.steps.map(s => `<li>${s}</li>`).join('')}</ul>
+      </div>
+    `).join('');
+  }
+
+  function renderVideos(videos, progress) {
+    if (!videos.length) return '<p>No videos available yet.</p>';
+    return videos.map(v => `
+      <div class="video-card">
+        <div class="video-thumbnail">
+          <iframe src="${v.url}" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <div>
+          <h4>${v.title}</h4>
+          <p>Duration: ${v.duration}</p>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderTips(tips) {
+    if (!Object.keys(tips).length) return '<p>No tips available yet.</p>';
+    let html = '';
+    for (let cat in tips) {
+      html += `<h4>${cat}</h4><ul>${tips[cat].map(t => `<li>${t}</li>`).join('')}</ul>`;
+    }
+    return html;
+  }
+
+  function renderNotes(existingNotes) {
+    return `
+      <textarea class="notes-textarea" id="notesText" rows="6" placeholder="Write your personal notes here...">${existingNotes}</textarea>
+      <button class="btn btn-primary" onclick="saveNotes()">Save Notes</button>
+    `;
+  }
+
+  async function saveNotes() {
+    const notes = document.getElementById('notesText').value;
+    if (!session?.token) return;
+    try {
+      await fetch(`${API_URL}/api/save-notes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+        body: JSON.stringify({ product_id: 'current', notes })
+      });
+      alert('Notes saved!');
+    } catch (error) {
+      alert('Failed to save notes');
+    }
+  }
+
+  function showTab(tabName) {
+    document.querySelectorAll('.premium-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.premium-tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.premium-tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+  }
+
+  async function checkSession() {
+    if (!session?.token) return;
+    try {
+      const res = await fetch(`${API_URL}/api/verify-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: session.token })
+      });
+      const data = await res.json();
+      if (data.valid) {
+        if (document.getElementById('verify').classList.contains('active')) {
+          showPremiumDashboard({ session: { customer: data.customer }, product: {}, premium_content: data.premium_content, progress: data.progress });
+        }
+      } else {
+        logout();
+      }
+    } catch (error) {
+      logout();
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('smartsolve_session');
+    session = null;
+    document.getElementById('memberDashboard').style.display = 'none';
+    location.reload();
+  }
+
+  function showSection(sectionId) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    window.scrollTo(0, 0);
+    if (sectionId === 'guides') renderProducts();
+    if (sectionId === 'checkout') renderCheckout();
+    if (sectionId === 'verify') checkSession();
+  }
+
+  function viewProduct(productId) {
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
+    let viewed = JSON.parse(localStorage.getItem('recentlyViewed')) || [];
+    viewed = viewed.filter(id => id !== productId);
+    viewed.unshift(productId);
+    localStorage.setItem('recentlyViewed', JSON.stringify(viewed.slice(0, 10)));
+    loadRecentlyViewed();
+    showSection('guides');
+    setTimeout(() => {
+      const el = document.querySelector(`.product-card[data-id="${productId}"]`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+  }
+
+  function toggleWishlist(productId) {
+    if (wishlist.includes(productId)) {
+      wishlist = wishlist.filter(id => id !== productId);
+    } else {
+      wishlist.push(productId);
+    }
+    localStorage.setItem('smartsolve_wishlist', JSON.stringify(wishlist));
+    renderProducts();
+  }
+
+  function formatCodeInput(input) {
+    let value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (value.length >= 8) {
+      let formatted = value.slice(0, 8);
+      if (value.length >= 11) {
+        formatted += '-' + value.slice(8, 11);
+        if (value.length >= 14) {
+          formatted += '-' + value.slice(11, 14);
+          if (value.length > 14) {
+            formatted += '-' + value.slice(14, 17);
+          }
+        } else {
+          formatted += '-' + value.slice(11);
+        }
+      } else {
+        formatted += value.slice(8);
+      }
+      input.value = formatted;
+    } else {
+      input.value = value;
+    }
+  }
+
+  function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+  }
+
+  function showToast(msg) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerText = msg;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '80px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.background = '#1e293b';
+    toast.style.color = 'white';
+    toast.style.padding = '0.75rem 1.5rem';
+    toast.style.borderRadius = '8px';
+    toast.style.zIndex = '1000';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.body.classList.add('dark-mode');
+  }
+
+  window.showSection = showSection;
+  window.addToCart = addToCart;
+  window.buyNow = buyNow;
+  window.removeFromCart = removeFromCart;
+  window.initiatePayment = initiatePayment;
+  window.verifyCodeReal = verifyCodeReal;
+  window.toggleWishlist = toggleWishlist;
+  window.viewProduct = viewProduct;
+  window.formatCodeInput = formatCodeInput;
+  window.toggleDarkMode = toggleDarkMode;
+  window.showTab = showTab;
+  window.saveNotes = saveNotes;
+  window.logout = logout;
+</script>
+</body>
+</html>

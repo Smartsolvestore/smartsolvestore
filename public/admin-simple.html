@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>SmartSolve Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: #0f172a; 
+      color: #fff; 
+      padding: 1rem;
+    }
+    .login-box {
+      max-width: 400px;
+      margin: 100px auto;
+      background: #1e293b;
+      padding: 2rem;
+      border-radius: 1rem;
+      text-align: center;
+    }
+    .dashboard {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .stat-card {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      border-left: 4px solid #3b82f6;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .card {
+      background: #1e293b;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 0.75rem;
+      margin: 0.5rem 0;
+      border-radius: 0.5rem;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: #fff;
+      font-size: 1rem;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      margin-top: 0.5rem;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    .btn-success {
+      background: #10b981;
+    }
+    .btn-success:hover {
+      background: #059669;
+    }
+    .btn-danger {
+      background: #ef4444;
+    }
+    .order-item {
+      background: #0f172a;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+    }
+    .tab {
+      padding: 0.5rem 1rem;
+      background: #334155;
+      border-radius: 2rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .tab.active {
+      background: #3b82f6;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .hidden {
+      display: none;
+    }
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #10b981;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 2rem;
+      z-index: 1000;
+      font-size: 0.9rem;
+    }
+    .logout-btn {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #ef4444;
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+    }
+    .product-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #0f172a;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .badge {
+      background: #f59e0b;
+      color: #0f172a;
+      padding: 0.2rem 0.5rem;
+      border-radius: 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-box">
+  <h2>🔐 Admin Login</h2>
+  <input type="tel" id="loginPhone" placeholder="Admin Phone (+91...)" value="+919123869646">
+  <input type="password" id="loginPass" placeholder="Password">
+  <button onclick="login()">Login</button>
+  <p id="loginError" style="color:#ef4444; margin-top:1rem; display:none;">Invalid credentials</p>
+</div>
+
+<div id="dashboard" class="dashboard" style="display:none;">
+  <button class="logout-btn" onclick="logout()">Logout</button>
+  <h1>🤖 SmartSolve Boss Bot</h1>
+  
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('dashboard')">📊 Dashboard</div>
+    <div class="tab" onclick="showTab('products')">📦 Products</div>
+    <div class="tab" onclick="showTab('orders')">🛒 Orders</div>
+    <div class="tab" onclick="showTab('cod')">🚚 COD</div>
+    <div class="tab" onclick="showTab('codes')">🎫 Codes</div>
+  </div>
+
+  <!-- DASHBOARD TAB -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="statRevenue">₹0</div>
+        <div>Total Revenue</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statOrders">0</div>
+        <div>Total Orders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statPending">0</div>
+        <div>Pending Orders</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statCustomers">0</div>
+        <div>Customers</div>
+      </div>
+    </div>
+    <button onclick="loadStats()">🔄 Refresh</button>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div id="tab-products" class="tab-content">
+    <div class="card">
+      <h2>➕ Add Product</h2>
+      <input type="text" id="pName" placeholder="Product Name">
+      <input type="number" id="pPrice" placeholder="Price (₹)">
+      <input type="number" id="pOriginal" placeholder="Original Price (optional)">
+      <textarea id="pDesc" placeholder="Description" rows="3"></textarea>
+      <input type="number" id="pStock" placeholder="Stock" value="10">
+      <select id="pEmoji">
+        <option value="📦">📦 General</option>
+        <option value="🚰">🚰 Faucet</option>
+        <option value="🎧">🎧 Earbuds</option>
+        <option value="✨">✨ Beauty</option>
+        <option value="🧊">🧊 Ice</option>
+      </select>
+      <label>
+        <input type="checkbox" id="pCodAllowed" checked> Allow COD
+      </label>
+      <button class="btn-success" onclick="addProduct()">Add Product</button>
+    </div>
+    <div class="card">
+      <h2>📋 Products</h2>
+      <div id="productList"></div>
+    </div>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div id="tab-orders" class="tab-content">
+    <div class="card">
+      <h2>🛒 Recent Orders</h2>
+      <div id="ordersList"></div>
+    </div>
+    <button onclick="loadOrders()">Refresh</button>
+  </div>
+
+  <!-- COD TAB -->
+  <div id="tab-cod" class="tab-content">
+    <div class="card">
+      <h2>🚚 COD Orders</h2>
+      <div id="codOrdersList"></div>
+    </div>
+    <button onclick="loadCODOrders()">Refresh</button>
+  </div>
+
+  <!-- CODES TAB -->
+  <div id="tab-codes" class="tab-content">
+    <div class="card">
+      <h2>🎫 Generate Verification Codes</h2>
+      <select id="cProduct"></select>
+      <input type="number" id="cQty" placeholder="Quantity" value="10">
+      <input type="text" id="cBatch" placeholder="Batch (optional)">
+      <button class="btn-success" onclick="generateCodes()">Generate</button>
+      <div id="generatedCodes" style="margin-top:1rem; background:#0f172a; padding:1rem; border-radius:0.5rem; font-family:monospace; display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_URL = window.location.origin;
+  let authToken = localStorage.getItem('adminToken');
+
+  if (authToken) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    init();
+  }
+
+  async function login() {
+    const phone = document.getElementById('loginPhone').value;
+    const pass = document.getElementById('loginPass').value;
+    const res = await fetch(`${API_URL}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone, password: pass })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      authToken = data.token;
+      localStorage.setItem('adminToken', authToken);
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      init();
+    } else {
+      document.getElementById('loginError').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem('adminToken');
+    location.reload();
+  }
+
+  function init() {
+    loadStats();
+    loadProducts();
+    loadOrders();
+    loadCODOrders();
+    loadProductsForSelect();
+  }
+
+  function showTab(tabName) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+    document.getElementById(`tab-${tabName}`).classList.add('active');
+  }
+
+  async function loadStats() {
+    const res = await fetch(`${API_URL}/api/admin/stats`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    document.getElementById('statRevenue').innerText = '₹' + (data.totalRevenue || 0);
+    document.getElementById('statOrders').innerText = data.totalOrders || 0;
+    document.getElementById('statPending').innerText = data.pendingOrders || 0;
+    document.getElementById('statCustomers').innerText = data.totalCustomers || 0;
+  }
+
+  async function loadProducts() {
+    const res = await fetch(`${API_URL}/api/products`);
+    const data = await res.json();
+    const list = document.getElementById('productList');
+    if (!data.products?.length) {
+      list.innerHTML = '<p>No products</p>';
+      return;
+    }
+    list.innerHTML = data.products.map(p => `
+      <div class="product-item">
+        <div>
+          <strong>${p.emoji} ${p.name}</strong><br>
+          ₹${p.price} | Stock: ${p.stock} | COD: ${p.cod_allowed ? 'Yes' : 'No'}
+        </div>
+        <div>
+          <button onclick="updateStock('${p.id}', ${p.stock + 10})">+10</button>
+          <button onclick="updatePrice('${p.id}')" style="background:#f59e0b;">Price</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function loadOrders() {
+    const res = await fetch(`${API_URL}/api/admin/orders`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    const list = document.getElementById('ordersList');
+    if (!data.orders?.length) {
+      list.innerHTML = '<p>No orders</p>';
+      return;
+    }
+    list.innerHTML = data.orders.slice(0, 20).map(o => `
+      <div class="order-item">
+        <div style="display:flex; justify-content:space-between;">
+          <strong>${o.customer_name}</strong>
+          <span>₹${o.amount}</span>
+        </div>
+        <div>📞 ${o.customer_phone}</div>
+        <div>📍 ${o.shipping_address?.substring(0, 50)}</div>
+        <div>Status: ${o.status} | ${o.payment_method === 'cod' ? 'COD' : 'UPI'}</div>
+      </div>
+    `).join('');
+  }
+
+  async function loadCODOrders() {
+    const res = await fetch(`${API_URL}/api/admin/orders?type=cod`, {
+      headers: { 'Authorization': `Bearer ${authToken}` }
+    });
+    const data = await res.json();
+    const list = document.getElementById('codOrdersList');
+    if (!data.orders?.length) {
+      list.innerHTML = '<p>No COD orders</p>';
+      return;
+    }
+    list.innerHTML = data.orders.map(o => `
+      <div class="order-item">
+        <div style="display:flex; justify-content:space-between;">
+          <strong>${o.customer_name}</strong>
+          <span>₹${o.amount}</span>
+        </div>
+        <div>📞 ${o.customer_phone}</div>
+        <div>📍 ${o.shipping_address?.substring(0, 50)}</div>
+        <div>Status: ${o.status === 'cod_pending' ? '⏳ Pending' : '✅ Confirmed'}</div>
+        ${o.status === 'cod_pending' ? `<button onclick="confirmCOD('${o.id}')" style="margin-top:8px;">Confirm Payment</button>` : ''}
+      </div>
+    `).join('');
+  }
+
+  async function confirmCOD(orderId) {
+    const res = await fetch(`${API_URL}/api/admin/confirm-cod`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ orderId })
+    });
+    if (res.ok) {
+      showToast('COD order confirmed');
+      loadCODOrders();
+    } else {
+      showToast('Failed to confirm', true);
+    }
+  }
+
+  async function addProduct() {
+    const product = {
+      id: document.getElementById('pName').value.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 12),
+      name: document.getElementById('pName').value,
+      price: parseInt(document.getElementById('pPrice').value),
+      original: parseInt(document.getElementById('pOriginal').value) || null,
+      description: document.getElementById('pDesc').value,
+      stock: parseInt(document.getElementById('pStock').value) || 10,
+      emoji: document.getElementById('pEmoji').value,
+      cod_allowed: document.getElementById('pCodAllowed').checked
+    };
+    if (!product.name || !product.price) {
+      alert('Name and price required');
+      return;
+    }
+    const res = await fetch(`${API_URL}/api/admin/add-product`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify(product)
+    });
+    if (res.ok) {
+      showToast('Product added');
+      loadProducts();
+      document.getElementById('pName').value = '';
+      document.getElementById('pPrice').value = '';
+      document.getElementById('pOriginal').value = '';
+      document.getElementById('pDesc').value = '';
+      document.getElementById('pStock').value = '10';
+    } else {
+      showToast('Failed to add product', true);
+    }
+  }
+
+  async function updateStock(productId, newStock) {
+    await fetch(`${API_URL}/api/admin/update-stock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ productId, stock: newStock })
+    });
+    loadProducts();
+  }
+
+  async function updatePrice(productId) {
+    const newPrice = prompt('Enter new price:');
+    if (!newPrice) return;
+    await fetch(`${API_URL}/api/admin/update-price`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ productId, price: parseInt(newPrice) })
+    });
+    loadProducts();
+  }
+
+  async function loadProductsForSelect() {
+    const res = await fetch(`${API_URL}/api/products`);
+    const data = await res.json();
+    const select = document.getElementById('cProduct');
+    select.innerHTML = data.products.map(p => `<option value="${p.id}">${p.emoji} ${p.name}</option>`).join('');
+  }
+
+  async function generateCodes() {
+    const productId = document.getElementById('cProduct').value;
+    const qty = parseInt(document.getElementById('cQty').value) || 10;
+    const batch = document.getElementById('cBatch').value;
+    if (!productId) {
+      alert('Select a product');
+      return;
+    }
+    const res = await fetch(`${API_URL}/api/admin/generate-codes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
+      body: JSON.stringify({ product_id: productId, quantity: qty, batch_id: batch })
+    });
+    const data = await res.json();
+    if (data.success) {
+      const div = document.getElementById('generatedCodes');
+      div.style.display = 'block';
+      div.innerHTML = `<strong>${data.generated} codes generated:</strong><br><br>${data.codes.join('<br>')}`;
+      showToast('Codes generated!');
+    } else {
+      showToast('Failed to generate codes', true);
+    }
+  }
+
+  function showToast(msg, isError = false) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.style.background = isError ? '#ef4444' : '#10b981';
+    toast.innerText = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
+  }
+
+  // Expose functions globally
+  window.showTab = showTab;
+  window.addProduct = addProduct;
+  window.updateStock = updateStock;
+  window.updatePrice = updatePrice;
+  window.confirmCOD = confirmCOD;
+  window.generateCodes = generateCodes;
+  window.loadOrders = loadOrders;
+  window.loadCODOrders = loadCODOrders;
+  window.loadStats = loadStats;
+</script>
+</body>
+</html>
